@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aadhil vs Isira — Rivalry Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #111214;
+  --surface: #1a1c20;
+  --surface2: #22252b;
+  --surface3: #2a2d34;
+  --border: #2e3138;
+  --text: #edecea;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+  --accent-a: #e63946;
+  --accent-a-dim: rgba(230,57,70,0.12);
+  --accent-a-glow: rgba(230,57,70,0.25);
+  --accent-i: #3b9edd;
+  --accent-i-dim: rgba(59,158,221,0.12);
+  --accent-i-glow: rgba(59,158,221,0.25);
+  --fifa: #00c47a;
+  --fifa-dim: rgba(0,196,122,0.12);
+  --nba: #e05c20;
+  --nba-dim: rgba(224,92,32,0.12);
+  --gold: #f0b429;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-lg: 0 2px 12px rgba(0,0,0,0.4), 0 16px 48px rgba(0,0,0,0.3);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.5; }
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, #16181e 0%, #1a1c22 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 20px 22px; text-align: center; position: relative; overflow: hidden;
+}
+header::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(-45deg, transparent, transparent 24px, rgba(255,255,255,0.012) 24px, rgba(255,255,255,0.012) 48px);
+}
+header::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 25% 50%, rgba(230,57,70,0.07) 0%, transparent 60%),
+              radial-gradient(ellipse at 75% 50%, rgba(59,158,221,0.07) 0%, transparent 60%);
+}
+.header-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; position: relative; z-index: 1; }
+header h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(38px,10vw,60px); letter-spacing: 0.04em; line-height: 1; position: relative; z-index: 1; }
+.name-a { color: var(--accent-a); text-shadow: 0 0 24px var(--accent-a-glow); }
+.name-i { color: var(--accent-i); text-shadow: 0 0 24px var(--accent-i-glow); }
+.vs-dot { display: inline-block; color: var(--border); margin: 0 10px; font-size: 0.55em; vertical-align: middle; }
+.sync-bar { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.12em; position: relative; z-index: 1; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── LAYOUT ── */
+main { max-width: 720px; margin: 0 auto; padding: 20px 16px 100px; }
+
+/* ── SECTION LABEL ── */
+.section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+
+/* ── OVERALL HERO ── */
+.rivalry-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 24px 20px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.rivalry-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 10% 50%, rgba(230,57,70,0.05) 0%, transparent 55%),
+              radial-gradient(ellipse at 90% 50%, rgba(59,158,221,0.05) 0%, transparent 55%);
+}
+.rivalry-scoreboard { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; margin-bottom: 20px; position: relative; }
+.player-block { text-align: center; }
+.player-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.08em; margin-bottom: 2px; }
+.player-block.aadhil .player-name { color: var(--accent-a); }
+.player-block.isira .player-name { color: var(--accent-i); }
+.player-wins { font-family: 'Bebas Neue', sans-serif; font-size: 56px; line-height: 1; }
+.player-block.aadhil .player-wins { color: var(--accent-a); text-shadow: 0 0 32px var(--accent-a-glow); }
+.player-block.isira .player-wins { color: var(--accent-i); text-shadow: 0 0 32px var(--accent-i-glow); }
+.player-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.vs-center { text-align: center; }
+.vs-label { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--text-muted); display: block; }
+.draws-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block; }
+
+/* Win bar */
+.win-bar-wrap { margin-bottom: 20px; }
+.win-bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-family: 'DM Mono', monospace; }
+.win-bar { height: 6px; border-radius: 99px; background: var(--surface3); overflow: hidden; display: flex; }
+.win-bar-a { background: linear-gradient(90deg, #c0202d, var(--accent-a)); border-radius: 99px 0 0 99px; transition: width 0.7s ease; }
+.win-bar-i { background: linear-gradient(90deg, var(--accent-i), #1a7fc4); border-radius: 0 99px 99px 0; transition: width 0.7s ease; margin-left: auto; }
+
+/* Milestones */
+.milestones-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.milestone-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; }
+.milestone-value { font-family: 'Bebas Neue', sans-serif; font-size: 20px; line-height: 1; color: var(--text); }
+.milestone-value.red { color: var(--accent-a); }
+.milestone-value.blue { color: var(--accent-i); }
+.milestone-label { font-size: 10px; color: var(--text-muted); margin-top: 3px; line-height: 1.3; }
+.last-game-score { font-family: 'Bebas Neue', sans-serif; font-size: 20px; line-height: 1; }
+.last-game-score.red { color: var(--accent-a); }
+.last-game-score.blue { color: var(--accent-i); }
+.last-game-meta { font-size: 9px; color: var(--text-muted); margin-top: 3px; font-family: 'DM Mono', monospace; letter-spacing: 0.06em; }
+
+/* ── GAME TABS ── */
+.game-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.game-tab { flex: 1; padding: 12px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s; color: var(--text-muted); text-align: center; }
+.game-tab .tab-badge { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; font-weight: 400; margin-top: 2px; text-transform: uppercase; }
+.game-tab.active.fifa { border-color: var(--fifa); color: var(--fifa); background: var(--fifa-dim); }
+.game-tab.active.nba { border-color: var(--nba); color: var(--nba); background: var(--nba-dim); }
+.game-tab:not(.active):hover { background: var(--surface2); color: var(--text-dim); }
+.game-section { display: none; }
+.game-section.active { display: block; }
+
+/* ── STATS CARDS ── */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 12px; text-align: center; box-shadow: var(--shadow); }
+.stat-card .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; }
+.stat-card .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+.stat-card.aadhil { border-color: rgba(230,57,70,0.2); background: linear-gradient(135deg, var(--surface) 60%, var(--accent-a-dim)); }
+.stat-card.aadhil .stat-val { color: var(--accent-a); }
+.stat-card.isira { border-color: rgba(59,158,221,0.2); background: linear-gradient(135deg, var(--surface) 60%, var(--accent-i-dim)); }
+.stat-card.isira .stat-val { color: var(--accent-i); }
+.stat-card.neutral .stat-val { color: var(--text-dim); }
+
+/* ── MARGIN ROW ── */
+.margin-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.margin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; box-shadow: var(--shadow); }
+.margin-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; }
+.margin-val.red { color: var(--accent-a); }
+.margin-val.blue { color: var(--accent-i); }
+.margin-val.neutral { color: var(--text-dim); }
+.margin-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Mono', monospace; margin-top: 3px; line-height: 1.3; }
+
+/* ── 2K INDIVIDUAL STAT CARDS ── */
+.nba-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.nba-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; box-shadow: var(--shadow); }
+.nba-sc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.nba-sc-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.06em; }
+.nba-sc-name.a { color: var(--accent-a); }
+.nba-sc-name.i { color: var(--accent-i); }
+.nba-sc-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); }
+.nba-sc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.nba-sc-stat { text-align: center; }
+.nba-sc-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; }
+.nba-sc-stat-val.a { color: var(--accent-a); }
+.nba-sc-stat-val.i { color: var(--accent-i); }
+.nba-sc-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+/* ── POINT DIFF BANNER ── */
+.diff-banner { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.diff-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.diff-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.diff-val.red { color: var(--accent-a); }
+.diff-val.blue { color: var(--accent-i); }
+.diff-val.neutral { color: var(--text-muted); }
+
+/* ── STREAK ROW ── */
+.streak-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.streak-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; }
+.streak-card-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.streak-card-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
+.streak-card-val.red { color: var(--accent-a); }
+.streak-card-val.blue { color: var(--accent-i); }
+.streak-card-val.none { color: var(--text-muted); font-size: 16px; }
+
+/* ── FIFA INDIVIDUAL STATS ── */
+.player-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.player-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; box-shadow: var(--shadow); }
+.psc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.psc-name { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.06em; }
+.psc-name.a { color: var(--accent-a); }
+.psc-name.i { color: var(--accent-i); }
+.psc-cs { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); }
+.psc-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.psc-stat { text-align: center; }
+.psc-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; }
+.psc-stat-val.a { color: var(--accent-a); }
+.psc-stat-val.i { color: var(--accent-i); }
+.psc-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+/* ── MILESTONE TRACKING TABLE ── */
+.milestone-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+.milestone-section-header { padding: 13px 18px; border-bottom: 1px solid var(--border); font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.06em; color: var(--text-dim); }
+.milestone-table { width: 100%; border-collapse: collapse; }
+.milestone-table th { padding: 8px 14px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border); font-weight: 400; }
+.milestone-table th:first-child { text-align: left; }
+.milestone-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.milestone-table tr:last-child td { border-bottom: none; }
+.milestone-table td:first-child { font-weight: 500; }
+.milestone-table td { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text-dim); }
+.milestone-table td:first-child { font-family: 'DM Sans', sans-serif; font-size: 13px; }
+.milestone-table td.a { color: var(--accent-a); }
+.milestone-table td.i { color: var(--accent-i); }
+.milestone-table tr:hover td { background: var(--surface2); }
+.milestone-empty { padding: 20px 18px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+/* ── ADD MATCH BUTTON ── */
+.add-match-btn { width: 100%; padding: 15px; border-radius: var(--radius-sm); border: 1px dashed var(--border); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.2s; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.add-match-btn:hover { background: var(--surface2); }
+.add-match-btn.fifa:hover { border-color: var(--fifa); color: var(--fifa); }
+.add-match-btn.nba:hover { border-color: var(--nba); color: var(--nba); }
+
+/* ── FLOATING ACTION BUTTON ── */
+.fab {
+  position: fixed; bottom: 28px; right: 20px; z-index: 90;
+  width: 56px; height: 56px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: linear-gradient(135deg, #2a2d34, #333740);
+  border: 1px solid var(--border);
+  color: var(--text); font-size: 24px; font-weight: 300;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,0,0,0.6); }
+.fab.fifa-active { background: linear-gradient(135deg, #004d30, #006b43); border-color: var(--fifa); color: var(--fifa); box-shadow: 0 4px 20px rgba(0,196,122,0.25); }
+.fab.nba-active { background: linear-gradient(135deg, #5a1f00, #7a2d00); border-color: var(--nba); color: var(--nba); box-shadow: 0 4px 20px rgba(224,92,32,0.25); }
+
+/* ── MODAL ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 100; padding: 20px 16px; overflow-y: auto; }
+.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; padding-top: 40px; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 20px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); animation: slideUp 0.25s ease; }
+@keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.06em; margin-bottom: 20px; }
+.modal-title.fifa { color: var(--fifa); }
+.modal-title.nba { color: var(--nba); }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.score-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; }
+.score-player-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; margin-bottom: 4px; }
+.score-player-label.a { color: var(--accent-a); }
+.score-player-label.i { color: var(--accent-i); }
+.vs-sep { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--text-muted); text-align: center; padding-bottom: 10px; }
+
+input[type="number"], input[type="text"], input[type="date"] {
+  width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; background: var(--surface2); color: var(--text);
+  outline: none; transition: border-color 0.2s; -webkit-appearance: none; appearance: none;
+}
+input:focus { border-color: var(--text-dim); background: var(--surface3); }
+input[type="number"] { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 28px; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+
+/* Validation error state */
+.input-error { border-color: var(--accent-a) !important; }
+.validation-msg { font-size: 12px; color: var(--accent-a); margin-top: 6px; padding: 8px 12px; background: var(--accent-a-dim); border-radius: 6px; border-left: 2px solid var(--accent-a); display: none; }
+.validation-msg.show { display: block; }
+
+/* Smart Autocomplete */
+.ac-wrap { position: relative; }
+.ac-list {
+  position: absolute; top: calc(100% + 2px); left: 0; right: 0;
+  background: var(--surface3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); z-index: 200; max-height: 150px; overflow-y: auto;
+  box-shadow: var(--shadow-lg); display: none;
+}
+.ac-list.show { display: block; }
+.ac-item { padding: 9px 14px; cursor: pointer; font-size: 14px; transition: background 0.1s; color: var(--text-dim); }
+.ac-item:hover, .ac-item.active { background: var(--surface2); color: var(--text); }
+
+/* Scorer rows */
+.scorer-col-header { display: grid; grid-template-columns: 1fr 58px 58px 36px; gap: 8px; margin-bottom: 4px; }
+.scorer-col-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; text-align: center; }
+.scorer-col-label:first-child { text-align: left; }
+.scorer-item { display: grid; grid-template-columns: 1fr 58px 58px 36px; gap: 8px; align-items: center; margin-bottom: 4px; }
+.scorer-item input[type="text"] { font-size: 14px; padding: 10px 10px; }
+.scorer-item input[type="number"] { font-size: 20px; padding: 10px 4px; }
+.scorer-manager-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; margin-top: 2px; }
+.manager-btn { padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-muted); font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+.manager-btn.active-a { border-color: var(--accent-a); background: var(--accent-a-dim); color: var(--accent-a); }
+.manager-btn.active-i { border-color: var(--accent-i); background: var(--accent-i-dim); color: var(--accent-i); }
+.btn-remove { width: 36px; height: 42px; border: none; background: rgba(220,38,38,0.15); color: #ef4444; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.btn-remove:hover { background: rgba(220,38,38,0.3); }
+.btn-add-scorer { font-size: 13px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 4px 0; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 4px; }
+.btn-add-scorer:hover { color: var(--text); }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 22px; }
+.btn-cancel { flex: 1; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: none; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+.btn-cancel:hover { background: var(--surface2); color: var(--text); }
+.btn-save { flex: 2; padding: 14px; border-radius: var(--radius-sm); border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; color: white; transition: opacity 0.2s; }
+.btn-save.fifa { background: var(--fifa); color: #000; }
+.btn-save.nba { background: var(--nba); }
+.btn-save.edit { background: var(--surface3); color: var(--text); border: 1px solid var(--border); }
+.btn-save:hover { opacity: 0.85; }
+
+/* ── HISTORY ── */
+.history-toggle { width: 100%; padding: 13px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; transition: all 0.2s; }
+.history-toggle:hover { color: var(--text); background: var(--surface2); }
+.history-toggle .arrow { transition: transform 0.2s; display: inline-block; }
+.history-toggle.open .arrow { transform: rotate(180deg); }
+.history-list { display: none; }
+.history-list.open { display: block; }
+
+/* Match card */
+.match-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px 14px 13px 18px; margin-bottom: 8px; box-shadow: var(--shadow); display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: start; gap: 10px; position: relative; overflow: hidden; }
+.match-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.match-card.win-a::before { background: var(--accent-a); }
+.match-card.win-i::before { background: var(--accent-i); }
+.match-card.draw::before { background: var(--border); }
+.match-left { text-align: right; }
+.match-right { text-align: left; }
+.match-player-name { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+.match-score-side { font-family: 'Bebas Neue', sans-serif; font-size: 28px; line-height: 1; color: var(--text-dim); }
+.match-card.win-a .match-left .match-score-side { color: var(--accent-a); }
+.match-card.win-i .match-right .match-score-side { color: var(--accent-i); }
+.match-center { text-align: center; padding-top: 12px; }
+.match-date { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-muted); letter-spacing: 0.08em; }
+.match-divider { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--border); display: block; margin-top: 2px; }
+.match-scorers { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+.scorer-chip { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; margin: 1px 2px 1px 0; font-size: 10px; color: var(--text-dim); }
+.match-actions { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
+.btn-match-action { width: 28px; height: 28px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: var(--surface2); color: var(--text-muted); }
+.btn-edit-match:hover { background: var(--accent-i-dim); color: var(--accent-i); }
+.btn-del-match:hover { background: var(--accent-a-dim); color: var(--accent-a); }
+
+/* In-app delete confirm */
+.delete-confirm { display: none; position: absolute; inset: 0; background: var(--surface); border-radius: var(--radius-sm); align-items: center; justify-content: space-between; padding: 0 14px; gap: 10px; z-index: 10; animation: fadeIn 0.15s ease; border: 1px solid rgba(220,38,38,0.3); }
+.delete-confirm.show { display: flex; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.delete-confirm-msg { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.delete-confirm-actions { display: flex; gap: 6px; }
+.btn-confirm-cancel { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: none; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-muted); font-family: 'DM Sans', sans-serif; }
+.btn-confirm-cancel:hover { background: var(--surface2); }
+.btn-confirm-delete { padding: 6px 12px; border-radius: 6px; border: none; background: #dc2626; color: white; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-confirm-delete:hover { background: #b91c1c; }
+
+/* ── LEADERBOARD ── */
+.leaderboard-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
+.leaderboard-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.leaderboard-header h3 { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.06em; color: var(--text-dim); }
+.leaderboard-tabs { display: flex; gap: 4px; }
+.lb-tab { padding: 5px 11px; border-radius: 6px; border: none; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; cursor: pointer; background: var(--surface2); color: var(--text-muted); transition: all 0.2s; }
+.lb-tab.active { background: var(--fifa); color: #000; font-weight: 600; }
+.lb-row { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; padding: 11px 18px; gap: 10px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: var(--surface2); }
+.lb-rank { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); text-align: center; }
+.lb-player-name { font-weight: 500; font-size: 14px; color: var(--text); }
+.lb-player-meta { font-size: 10px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+.lb-val { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--fifa); text-align: right; }
+.lb-empty { padding: 22px 18px; text-align: center; color: var(--text-muted); font-size: 13px; }
+.mgr-badge { display: inline-block; padding: 1px 7px; border-radius: 99px; font-size: 9px; font-family: 'DM Mono', monospace; font-weight: 500; margin-left: 5px; vertical-align: middle; }
+.mgr-badge.a { background: var(--accent-a-dim); color: var(--accent-a); border: 1px solid rgba(230,57,70,0.2); }
+.mgr-badge.i { background: var(--accent-i-dim); color: var(--accent-i); border: 1px solid rgba(59,158,221,0.2); }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
+.empty-state .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.5; }
+.empty-state p { font-size: 13px; line-height: 1.6; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface3); border: 1px solid var(--border); color: var(--text); padding: 11px 20px; border-radius: 99px; font-size: 13px; font-weight: 500; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; pointer-events: none; box-shadow: var(--shadow-lg); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { border-color: var(--accent-a); color: var(--accent-a); background: var(--accent-a-dim); }
+
+@media(min-width:640px) { header { padding: 36px 20px 28px; } main { padding: 24px 20px 100px; } .fab { bottom: 32px; right: 32px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">The Flatmate Rivalry · Oslo</div>
+  <h1><span class="name-a">Aadhil</span><span class="vs-dot">×</span><span class="name-i">Isira</span></h1>
+  <div class="sync-bar"><div class="sync-dot"></div><span id="syncLabel">LOADING</span></div>
+</header>
+
+<main>
+
+  <!-- OVERALL HERO -->
+  <div class="rivalry-hero">
+    <div class="section-label">Overall Rivalry — All Games</div>
+    <div class="rivalry-scoreboard">
+      <div class="player-block aadhil">
+        <div class="player-name">Aadhil</div>
+        <div class="player-wins" id="overallWinsA">0</div>
+        <div class="player-sub">Wins</div>
+      </div>
+      <div class="vs-center">
+        <span class="vs-label">VS</span>
+        <span class="draws-count" id="overallDraws">0 Draws</span>
+      </div>
+      <div class="player-block isira">
+        <div class="player-name">Isira</div>
+        <div class="player-wins" id="overallWinsI">0</div>
+        <div class="player-sub">Wins</div>
+      </div>
+    </div>
+    <div class="win-bar-wrap">
+      <div class="win-bar-labels"><span id="barLabelA">—</span><span id="barLabelI">—</span></div>
+      <div class="win-bar">
+        <div class="win-bar-a" id="winBarA" style="width:0%"></div>
+        <div class="win-bar-i" id="winBarI" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="milestones-grid">
+      <div class="milestone-card">
+        <div class="milestone-value" id="mTotalGames">0</div>
+        <div class="milestone-label">Total Games</div>
+      </div>
+      <div class="milestone-card">
+        <div class="milestone-value" id="mStreak">—</div>
+        <div class="milestone-label" id="mStreakLabel">Current Streak</div>
+      </div>
+      <div class="milestone-card">
+        <div class="last-game-score" id="mLastScore">—</div>
+        <div class="last-game-meta" id="mLastMeta">Last Game</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME TABS -->
+  <div class="game-tabs">
+    <button class="game-tab active fifa" onclick="switchGame('fifa')">⚽ FIFA<span class="tab-badge" id="fifaBadge">0 games</span></button>
+    <button class="game-tab nba" onclick="switchGame('nba')">🏀 NBA 2K<span class="tab-badge" id="nbaBadge">0 games</span></button>
+  </div>
+
+  <!-- FIFA -->
+  <div class="game-section active" id="section-fifa">
+    <div class="stats-row">
+      <div class="stat-card aadhil"><div class="stat-val" id="fifaWinsA">0</div><div class="stat-label">Aadhil Wins</div></div>
+      <div class="stat-card neutral"><div class="stat-val" id="fifaDraws">0</div><div class="stat-label">Draws</div></div>
+      <div class="stat-card isira"><div class="stat-val" id="fifaWinsI">0</div><div class="stat-label">Isira Wins</div></div>
+    </div>
+    <div class="streak-row">
+      <div class="streak-card">
+        <div><div class="streak-card-label">⚽ FIFA Streak</div><div style="font-size:10px;color:var(--text-muted);margin-top:1px" id="fifaStreakSub">No streak</div></div>
+        <div class="streak-card-val" id="fifaStreakVal">—</div>
+      </div>
+      <div class="streak-card" id="fifaFormCard" style="opacity:0.35">
+        <div><div class="streak-card-label">Form</div><div style="font-size:10px;color:var(--text-muted);margin-top:1px">Last 5</div></div>
+        <div style="font-size:13px;letter-spacing:2px" id="fifaForm">—</div>
+      </div>
+    </div>
+    <div class="player-stat-grid">
+      <div class="player-stat-card">
+        <div class="psc-header"><div class="psc-name a">Aadhil</div><div class="psc-cs"><span id="fifaCSA">0</span> clean sheets</div></div>
+        <div class="psc-stats">
+          <div class="psc-stat"><div class="psc-stat-val a" id="fifaGoalsA">0</div><div class="psc-stat-label">Goals</div></div>
+          <div class="psc-stat"><div class="psc-stat-val a" id="fifaAssistsA">0</div><div class="psc-stat-label">Assists</div></div>
+          <div class="psc-stat"><div class="psc-stat-val a" id="fifaGPGA">0.0</div><div class="psc-stat-label">G/Game</div></div>
+        </div>
+      </div>
+      <div class="player-stat-card">
+        <div class="psc-header"><div class="psc-name i">Isira</div><div class="psc-cs"><span id="fifaCSI">0</span> clean sheets</div></div>
+        <div class="psc-stats">
+          <div class="psc-stat"><div class="psc-stat-val i" id="fifaGoalsI">0</div><div class="psc-stat-label">Goals</div></div>
+          <div class="psc-stat"><div class="psc-stat-val i" id="fifaAssistsI">0</div><div class="psc-stat-label">Assists</div></div>
+          <div class="psc-stat"><div class="psc-stat-val i" id="fifaGPGI">0.0</div><div class="psc-stat-label">G/Game</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="margin-row">
+      <div class="margin-card"><div class="margin-val red" id="fifaMarginA">—</div><div class="margin-label">Aadhil<br>Best Win</div></div>
+      <div class="margin-card"><div class="margin-val neutral" id="fifaMarginAll">—</div><div class="margin-label">Biggest<br>Win Ever</div></div>
+      <div class="margin-card"><div class="margin-val blue" id="fifaMarginI">—</div><div class="margin-label">Isira<br>Best Win</div></div>
+    </div>
+
+    <!-- Milestone tracking -->
+    <div class="milestone-section" id="fifaMilestoneSection" style="display:none">
+      <div class="milestone-section-header">🎯 Scoring Milestones</div>
+      <table class="milestone-table" id="fifaMilestoneTable"></table>
+    </div>
+
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <h3>🏆 Player Stats</h3>
+        <div class="leaderboard-tabs">
+          <button class="lb-tab active" onclick="switchLbTab('goals')" id="lbTabGoals">Goals</button>
+          <button class="lb-tab" onclick="switchLbTab('assists')" id="lbTabAssists">Assists</button>
+        </div>
+      </div>
+      <div id="lbGoals"></div>
+      <div id="lbAssists" style="display:none"></div>
+    </div>
+    <button class="add-match-btn fifa" onclick="openModal('fifa')">+ Log FIFA Match</button>
+    <button class="history-toggle" id="fifaHistoryToggle" onclick="toggleHistory('fifa')"><span>Match History</span><span class="arrow">▼</span></button>
+    <div class="history-list" id="fifaHistory"></div>
+  </div>
+
+  <!-- NBA -->
+  <div class="game-section" id="section-nba">
+    <div class="stats-row">
+      <div class="stat-card aadhil"><div class="stat-val" id="nbaWinsA">0</div><div class="stat-label">Aadhil Wins</div></div>
+      <div class="stat-card neutral"><div class="stat-val" id="nbaDraws">0</div><div class="stat-label">Draws</div></div>
+      <div class="stat-card isira"><div class="stat-val" id="nbaWinsI">0</div><div class="stat-label">Isira Wins</div></div>
+    </div>
+    <div class="streak-row">
+      <div class="streak-card">
+        <div><div class="streak-card-label">🏀 2K Streak</div><div style="font-size:10px;color:var(--text-muted);margin-top:1px" id="nbaStreakSub">No streak</div></div>
+        <div class="streak-card-val" id="nbaStreakVal">—</div>
+      </div>
+      <div class="streak-card" id="nbaFormCard" style="opacity:0.35">
+        <div><div class="streak-card-label">Form</div><div style="font-size:10px;color:var(--text-muted);margin-top:1px">Last 5</div></div>
+        <div style="font-size:13px;letter-spacing:2px" id="nbaForm">—</div>
+      </div>
+    </div>
+    <div class="nba-stat-grid">
+      <div class="nba-stat-card">
+        <div class="nba-sc-header"><div class="nba-sc-name a">Aadhil</div><div class="nba-sc-sub">Points</div></div>
+        <div class="nba-sc-stats">
+          <div class="nba-sc-stat"><div class="nba-sc-stat-val a" id="nbaAvgA">0.0</div><div class="nba-sc-stat-label">Avg Pts</div></div>
+          <div class="nba-sc-stat"><div class="nba-sc-stat-val a" id="nbaBestA">—</div><div class="nba-sc-stat-label">Best Score</div></div>
+        </div>
+      </div>
+      <div class="nba-stat-card">
+        <div class="nba-sc-header"><div class="nba-sc-name i">Isira</div><div class="nba-sc-sub">Points</div></div>
+        <div class="nba-sc-stats">
+          <div class="nba-sc-stat"><div class="nba-sc-stat-val i" id="nbaAvgI">0.0</div><div class="nba-sc-stat-label">Avg Pts</div></div>
+          <div class="nba-sc-stat"><div class="nba-sc-stat-val i" id="nbaBestI">—</div><div class="nba-sc-stat-label">Best Score</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="diff-banner">
+      <div class="diff-label">Avg Point Differential</div>
+      <div class="diff-val" id="nbaDiff">—</div>
+    </div>
+    <div class="margin-row">
+      <div class="margin-card"><div class="margin-val red" id="nbaMarginA">—</div><div class="margin-label">Aadhil<br>Best Win</div></div>
+      <div class="margin-card"><div class="margin-val neutral" id="nbaMarginAll">—</div><div class="margin-label">Biggest<br>Win Ever</div></div>
+      <div class="margin-card"><div class="margin-val blue" id="nbaMarginI">—</div><div class="margin-label">Isira<br>Best Win</div></div>
+    </div>
+    <button class="add-match-btn nba" onclick="openModal('nba')">+ Log 2K Match</button>
+    <button class="history-toggle" id="nbaHistoryToggle" onclick="toggleHistory('nba')"><span>Match History</span><span class="arrow">▼</span></button>
+    <div class="history-list" id="nbaHistory"></div>
+  </div>
+
+</main>
+
+<!-- FAB -->
+<button class="fab fifa-active" id="fab" onclick="fabClick()" title="Log Game">+</button>
+
+<!-- FIFA MODAL -->
+<div class="modal-overlay" id="fifaModal">
+  <div class="modal">
+    <div class="modal-title fifa" id="fifaModalTitle">⚽ Log FIFA Match</div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input type="date" id="fifaDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Score</label>
+      <div class="score-row">
+        <div><div class="score-player-label a">Aadhil</div><input type="number" id="fifaScoreA" min="0" max="20" value="0" oninput="onScoreChange()"></div>
+        <div class="vs-sep">—</div>
+        <div><div class="score-player-label i">Isira</div><input type="number" id="fifaScoreI" min="0" max="20" value="0" oninput="onScoreChange()"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Goal Scorers &amp; Assists</label>
+      <div class="scorer-col-header">
+        <span class="scorer-col-label" style="text-align:left">Player</span>
+        <span class="scorer-col-label">⚽ Gls</span>
+        <span class="scorer-col-label">🎯 Ast</span>
+        <span></span>
+      </div>
+      <div id="fifaScorerList"></div>
+      <button class="btn-add-scorer" onclick="addScorerRow()">+ Add player</button>
+      <div class="validation-msg" id="validationMsg"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('fifa')">Cancel</button>
+      <button class="btn-save fifa" id="fifaSaveBtn" onclick="saveMatch('fifa')">Save Match</button>
+    </div>
+  </div>
+</div>
+
+<!-- NBA MODAL -->
+<div class="modal-overlay" id="nbaModal">
+  <div class="modal">
+    <div class="modal-title nba" id="nbaModalTitle">🏀 Log 2K Match</div>
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input type="date" id="nbaDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Score</label>
+      <div class="score-row">
+        <div><div class="score-player-label a">Aadhil</div><input type="number" id="nbaScoreA" min="0" max="200" value="0"></div>
+        <div class="vs-sep">—</div>
+        <div><div class="score-player-label i">Isira</div><input type="number" id="nbaScoreI" min="0" max="200" value="0"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('nba')">Cancel</button>
+      <button class="btn-save nba" id="nbaSaveBtn" onclick="saveMatch('nba')">Save Match</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────
+const JSONBIN_BIN_ID  = '69da5708aaba882197e9ff52';
+const JSONBIN_API_KEY = '$2a$10$Megw7YnRy64t5JAWpc8zpOnaut6f9LU2aMyT8vbEuAD7NYkRlbnzi';
+const JSONBIN_URL     = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
+// ── STATE ───────────────────────────────────────────────────────────────
+let state = { fifa: [], nba: [] };
+let scorerCounter  = 0;
+let scorerManagers = {};
+let editingGame    = null;
+let editingId      = null;
+let currentGame    = 'fifa';
+// All known player names for autocomplete
+let knownNames     = [];
+
+// ── BOOT ────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  setDate('fifaDate'); setDate('nbaDate');
+  loadData();
+  updateFab();
+});
+
+function today()  { return new Date().toISOString().split('T')[0]; }
+function setDate(id) { document.getElementById(id).value = today(); }
+function uid()    { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function formatDate(d) {
+  if (!d) return '';
+  return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+}
+function getResult(m) {
+  const sA=+m.scoreA, sI=+m.scoreI;
+  if(sA>sI) return 'A'; if(sI>sA) return 'I'; return 'D';
+}
+
+// ── JSONBIN ─────────────────────────────────────────────────────────────
+async function loadData() {
+  setSyncLabel('LOADING…');
+  try {
+    const r = await fetch(JSONBIN_URL+'/latest', { headers:{'X-Access-Key':JSONBIN_API_KEY} });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    if(d.record) state = { fifa: d.record.fifa||[], nba: d.record.nba||[] };
+    setSyncLabel('SYNCED');
+  } catch(e) { setSyncLabel('OFFLINE'); showToast('Could not load — running offline'); }
+  render();
+}
+async function saveData() {
+  render();
+  setSyncLabel('SAVING…');
+  try {
+    const r = await fetch(JSONBIN_URL, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Access-Key':JSONBIN_API_KEY},
+      body: JSON.stringify(state)
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    setSyncLabel('SYNCED');
+    showToast(editingId ? 'Match updated ✓' : 'Match saved ✓');
+  } catch(e) { setSyncLabel('ERROR'); showToast('Sync failed — check connection'); }
+}
+function setSyncLabel(t) { document.getElementById('syncLabel').textContent = t; }
+
+// ── RENDER ──────────────────────────────────────────────────────────────
+function render() {
+  renderOverall();
+  renderFifa();
+  renderNba();
+  renderLeaderboard();
+  buildKnownNames();
+}
+
+function renderOverall() {
+  const all = [...state.fifa, ...state.nba];
+  let wA=0,wI=0,draws=0;
+  all.forEach(m=>{const r=getResult(m); if(r==='A')wA++;else if(r==='I')wI++;else draws++;});
+
+  document.getElementById('overallWinsA').textContent = wA;
+  document.getElementById('overallWinsI').textContent = wI;
+  document.getElementById('overallDraws').textContent = draws+(draws===1?' Draw':' Draws');
+  document.getElementById('mTotalGames').textContent  = all.length;
+
+  const total = wA+wI;
+  if(total>0){
+    const pA=Math.round(wA/total*100), pI=100-pA;
+    document.getElementById('winBarA').style.width  = pA+'%';
+    document.getElementById('winBarI').style.width  = pI+'%';
+    document.getElementById('barLabelA').textContent = pA+'%';
+    document.getElementById('barLabelI').textContent = pI+'%';
+  } else {
+    document.getElementById('winBarA').style.width  = '0%';
+    document.getElementById('winBarI').style.width  = '0%';
+    document.getElementById('barLabelA').textContent = '—';
+    document.getElementById('barLabelI').textContent = '—';
+  }
+
+  const streak = computeStreak(all);
+  const mStreak = document.getElementById('mStreak');
+  if(streak.count>0){
+    const name = streak.who==='A'?'Aadhil':'Isira';
+    mStreak.textContent  = name+' '+streak.count+'W';
+    mStreak.className    = 'milestone-value '+(streak.who==='A'?'red':'blue');
+    mStreak.style.fontSize = streak.count>=10?'15px':'18px';
+  } else {
+    mStreak.textContent='—'; mStreak.className='milestone-value'; mStreak.style.fontSize='';
+  }
+  document.getElementById('mStreakLabel').textContent = 'Current Streak';
+
+  // Last game — date sort then insertion order tiebreak
+  const tagged = [
+    ...state.fifa.map((m,i)=>({...m,_game:'fifa',_idx:i})),
+    ...state.nba.map((m,i)=>({...m,_game:'nba',_idx:i}))
+  ].sort((a,b)=>{
+    const dd=new Date(b.date)-new Date(a.date);
+    return dd!==0 ? dd : b._idx-a._idx;
+  });
+  const lastEl=document.getElementById('mLastScore'), metaEl=document.getElementById('mLastMeta');
+  if(tagged.length){
+    const m=tagged[0], r=getResult(m), icon=m._game==='fifa'?'⚽':'🏀';
+    lastEl.textContent = m.scoreA+'–'+m.scoreI;
+    lastEl.className   = 'last-game-score '+(r==='A'?'red':r==='I'?'blue':'');
+    metaEl.textContent = icon+' '+(r==='A'?'Aadhil W':r==='I'?'Isira W':'Draw')+' · '+formatDate(m.date);
+  } else { lastEl.textContent='—'; lastEl.className='last-game-score'; metaEl.textContent='Last Game'; }
+}
+
+function computeStreak(matches){
+  const s=[...matches].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  let who=null,count=0;
+  for(const m of s){
+    const r=getResult(m);
+    if(r==='D') break;
+    if(!who){who=r;count=1;} else if(who===r) count++; else break;
+  }
+  return {who,count};
+}
+
+function computeForm(matches,n=5){
+  return [...matches].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,n).map(m=>{
+    const r=getResult(m);
+    if(r==='A') return '<span style="color:var(--accent-a);font-weight:700">W</span>';
+    if(r==='I') return '<span style="color:var(--accent-i);font-weight:700">L</span>';
+    return '<span style="color:var(--text-muted)">D</span>';
+  }).join('');
+}
+
+function renderFifa(){
+  let wA=0,wI=0,draws=0,goalsA=0,goalsI=0,assistsA=0,assistsI=0;
+  let bestMarginA=0,bestMarginI=0,bestMarginAll=0;
+  let bestWinA='—',bestWinI='—',bestWinAll='—';
+
+  state.fifa.forEach(m=>{
+    const r=getResult(m);
+    if(r==='A')wA++;else if(r==='I')wI++;else draws++;
+    goalsA+=+m.scoreA; goalsI+=+m.scoreI;
+    (m.scorers||[]).forEach(s=>{
+      if(s.manager==='A') assistsA+=+s.assists||0;
+      else assistsI+=+s.assists||0;
+    });
+    const diff=Math.abs(+m.scoreA-+m.scoreI);
+    const score=m.scoreA+'–'+m.scoreI;
+    if(diff>bestMarginAll){bestMarginAll=diff;bestWinAll=score;}
+    if(r==='A'&&diff>bestMarginA){bestMarginA=diff;bestWinA=score;}
+    if(r==='I'&&diff>bestMarginI){bestMarginI=diff;bestWinI=score;}
+  });
+
+  const gp=state.fifa.length;
+  const csA=state.fifa.filter(m=>+m.scoreI===0).length;
+  const csI=state.fifa.filter(m=>+m.scoreA===0).length;
+  const gpgA=gp>0?(goalsA/gp).toFixed(1):'0.0';
+  const gpgI=gp>0?(goalsI/gp).toFixed(1):'0.0';
+
+  document.getElementById('fifaWinsA').textContent    = wA;
+  document.getElementById('fifaWinsI').textContent    = wI;
+  document.getElementById('fifaDraws').textContent    = draws;
+  document.getElementById('fifaBadge').textContent    = gp+(gp===1?' game':' games');
+  document.getElementById('fifaGoalsA').textContent   = goalsA;
+  document.getElementById('fifaGoalsI').textContent   = goalsI;
+  document.getElementById('fifaAssistsA').textContent = assistsA;
+  document.getElementById('fifaAssistsI').textContent = assistsI;
+  document.getElementById('fifaCSA').textContent      = csA;
+  document.getElementById('fifaCSI').textContent      = csI;
+  document.getElementById('fifaGPGA').textContent     = gpgA;
+  document.getElementById('fifaGPGI').textContent     = gpgI;
+  document.getElementById('fifaMarginA').textContent  = bestWinA;
+  document.getElementById('fifaMarginI').textContent  = bestWinI;
+  document.getElementById('fifaMarginAll').textContent= bestWinAll;
+
+  const streak=computeStreak(state.fifa);
+  const sv=document.getElementById('fifaStreakVal'), ss=document.getElementById('fifaStreakSub');
+  if(streak.count>0){
+    sv.textContent=streak.count+'W'; sv.className='streak-card-val '+(streak.who==='A'?'red':'blue');
+    ss.textContent=(streak.who==='A'?'Aadhil':'Isira')+' on a roll';
+  } else { sv.textContent='—'; sv.className='streak-card-val none'; ss.textContent='No streak'; }
+
+  const formStr=computeForm(state.fifa);
+  if(formStr){
+    document.getElementById('fifaForm').innerHTML=formStr;
+    document.getElementById('fifaFormCard').style.opacity='1';
+  }
+
+  renderMilestones();
+  renderFifaHistory();
+}
+
+// ── MILESTONE TRACKING ──────────────────────────────────────────────────
+function renderMilestones(){
+  // Per player: track hat-tricks(3), 4, 5, 6, 7
+  const tiers = [3,4,5,6,7];
+  const playerMilestones = {}; // { name: { manager, 3:0,4:0,5:0,6:0,7:0 } }
+
+  state.fifa.forEach(m=>{
+    (m.scorers||[]).forEach(s=>{
+      const name = s.name?.trim();
+      if(!name) return;
+      const g = +s.goals||0;
+      if(g===0) return;
+      if(!playerMilestones[name]) playerMilestones[name]={manager:s.manager,3:0,4:0,5:0,6:0,7:0};
+      // Increment all tiers up to g
+      tiers.forEach(t=>{ if(g>=t) playerMilestones[name][t]++; });
+    });
+  });
+
+  const players = Object.values(playerMilestones);
+  // Determine which tiers are actually reached by anyone
+  const activeTiers = tiers.filter(t=>players.some(p=>p[t]>0));
+
+  const section = document.getElementById('fifaMilestoneSection');
+  const table   = document.getElementById('fifaMilestoneTable');
+
+  if(!activeTiers.length || !players.length){
+    section.style.display='none';
+    return;
+  }
+  section.style.display='block';
+
+  const tierLabels = {3:'Hat-trick',4:'4 Goals',5:'5 Goals',6:'6 Goals',7:'7 Goals'};
+  const header = `<thead><tr>
+    <th>Player</th>
+    ${activeTiers.map(t=>`<th>${tierLabels[t]}</th>`).join('')}
+  </tr></thead>`;
+
+  // Sort by hat-tricks desc, then name
+  players.sort((a,b)=>(b[3]||0)-(a[3]||0));
+
+  const rows = players.filter(p=>activeTiers.some(t=>p[t]>0)).map(p=>{
+    const cls = p.manager==='A'?'a':'i';
+    const badge = p.manager==='A'
+      ? '<span class="mgr-badge a">Aadhil</span>'
+      : '<span class="mgr-badge i">Isira</span>';
+    const cells = activeTiers.map(t=>`<td class="${p[t]>0?cls:''}">${p[t]>0?p[t]:'—'}</td>`).join('');
+    return `<tr><td>${p.name}${badge}</td>${cells}</tr>`;
+  }).join('');
+
+  table.innerHTML = header+`<tbody>${rows}</tbody>`;
+}
+
+function renderNba(){
+  let wA=0,wI=0,draws=0,totalA=0,totalI=0,bestA=0,bestI=0;
+  let bestMarginA=0,bestMarginI=0,bestMarginAll=0;
+  let bestWinA='—',bestWinI='—',bestWinAll='—';
+
+  state.nba.forEach(m=>{
+    const r=getResult(m);
+    if(r==='A')wA++;else if(r==='I')wI++;else draws++;
+    const sA=+m.scoreA,sI=+m.scoreI;
+    totalA+=sA; totalI+=sI;
+    if(sA>bestA) bestA=sA;
+    if(sI>bestI) bestI=sI;
+    const diff=Math.abs(sA-sI), score=m.scoreA+'–'+m.scoreI;
+    if(diff>bestMarginAll){bestMarginAll=diff;bestWinAll=score;}
+    if(r==='A'&&diff>bestMarginA){bestMarginA=diff;bestWinA=score;}
+    if(r==='I'&&diff>bestMarginI){bestMarginI=diff;bestWinI=score;}
+  });
+
+  const gp=state.nba.length;
+  const avgA=gp>0?(totalA/gp).toFixed(1):'0.0';
+  const avgI=gp>0?(totalI/gp).toFixed(1):'0.0';
+  const avgDiff=gp>0?(totalA-totalI)/gp:0;
+
+  document.getElementById('nbaWinsA').textContent   = wA;
+  document.getElementById('nbaWinsI').textContent   = wI;
+  document.getElementById('nbaDraws').textContent   = draws;
+  document.getElementById('nbaBadge').textContent   = gp+(gp===1?' game':' games');
+  document.getElementById('nbaAvgA').textContent    = avgA;
+  document.getElementById('nbaAvgI').textContent    = avgI;
+  document.getElementById('nbaBestA').textContent   = bestA||'—';
+  document.getElementById('nbaBestI').textContent   = bestI||'—';
+  document.getElementById('nbaMarginA').textContent = bestWinA;
+  document.getElementById('nbaMarginI').textContent = bestWinI;
+  document.getElementById('nbaMarginAll').textContent=bestWinAll;
+
+  const diffEl=document.getElementById('nbaDiff');
+  if(gp===0){diffEl.textContent='—';diffEl.className='diff-val neutral';}
+  else if(avgDiff>0){diffEl.textContent='+'+avgDiff.toFixed(1)+' Aadhil';diffEl.className='diff-val red';}
+  else if(avgDiff<0){diffEl.textContent='+'+Math.abs(avgDiff).toFixed(1)+' Isira';diffEl.className='diff-val blue';}
+  else{diffEl.textContent='0.0 Even';diffEl.className='diff-val neutral';}
+
+  const streak=computeStreak(state.nba);
+  const sv=document.getElementById('nbaStreakVal'),ss=document.getElementById('nbaStreakSub');
+  if(streak.count>0){
+    sv.textContent=streak.count+'W'; sv.className='streak-card-val '+(streak.who==='A'?'red':'blue');
+    ss.textContent=(streak.who==='A'?'Aadhil':'Isira')+' on a roll';
+  } else { sv.textContent='—'; sv.className='streak-card-val none'; ss.textContent='No streak'; }
+
+  const formStr=computeForm(state.nba);
+  if(formStr){
+    document.getElementById('nbaForm').innerHTML=formStr;
+    document.getElementById('nbaFormCard').style.opacity='1';
+  }
+
+  renderNbaHistory();
+}
+
+function renderFifaHistory(){
+  const el=document.getElementById('fifaHistory');
+  if(!state.fifa.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">⚽</div><p>No FIFA matches yet.<br>Log your first one!</p></div>';
+    return;
+  }
+  // Most recent first — date desc, then insertion order desc
+  const sorted=[...state.fifa].map((m,i)=>({...m,_idx:i}))
+    .sort((a,b)=>{const dd=new Date(b.date)-new Date(a.date);return dd!==0?dd:b._idx-a._idx;});
+  el.innerHTML=sorted.map(m=>{
+    const r=getResult(m),cls=r==='A'?'win-a':r==='I'?'win-i':'draw';
+    const leftS=(m.scorers||[]).filter(s=>s.manager==='A'&&(+s.goals>0||+s.assists>0));
+    const rightS=(m.scorers||[]).filter(s=>s.manager==='I'&&(+s.goals>0||+s.assists>0));
+    const chip=s=>{
+      const p=[];if(+s.goals>0)p.push(s.goals+'⚽');if(+s.assists>0)p.push(s.assists+'🎯');
+      return `<span class="scorer-chip">${s.name} ${p.join(' ')}</span>`;
+    };
+    return `<div class="match-card ${cls}" id="mc-${m.id}">
+      <div class="match-left">
+        <div class="match-player-name">Aadhil</div>
+        <div class="match-score-side">${m.scoreA}</div>
+        ${leftS.length?`<div class="match-scorers">${leftS.map(chip).join('')}</div>`:''}
+      </div>
+      <div class="match-center">
+        <div class="match-date">${formatDate(m.date)}</div>
+        <span class="match-divider">—</span>
+      </div>
+      <div class="match-right">
+        <div class="match-player-name">Isira</div>
+        <div class="match-score-side">${m.scoreI}</div>
+        ${rightS.length?`<div class="match-scorers">${rightS.map(chip).join('')}</div>`:''}
+      </div>
+      <div class="match-actions">
+        <button class="btn-match-action btn-edit-match" onclick="openEdit('fifa','${m.id}')" title="Edit">✎</button>
+        <button class="btn-match-action btn-del-match" onclick="showDeleteConfirm('${m.id}')" title="Delete">🗑</button>
+      </div>
+      <div class="delete-confirm" id="dc-${m.id}">
+        <span class="delete-confirm-msg">Delete this match?</span>
+        <div class="delete-confirm-actions">
+          <button class="btn-confirm-cancel" onclick="hideDeleteConfirm('${m.id}')">Cancel</button>
+          <button class="btn-confirm-delete" onclick="confirmDelete('fifa','${m.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNbaHistory(){
+  const el=document.getElementById('nbaHistory');
+  if(!state.nba.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🏀</div><p>No 2K matches yet.<br>Log your first one!</p></div>';
+    return;
+  }
+  const sorted=[...state.nba].map((m,i)=>({...m,_idx:i}))
+    .sort((a,b)=>{const dd=new Date(b.date)-new Date(a.date);return dd!==0?dd:b._idx-a._idx;});
+  el.innerHTML=sorted.map(m=>{
+    const r=getResult(m),cls=r==='A'?'win-a':r==='I'?'win-i':'draw';
+    return `<div class="match-card ${cls}" id="mc-${m.id}">
+      <div class="match-left"><div class="match-player-name">Aadhil</div><div class="match-score-side">${m.scoreA}</div></div>
+      <div class="match-center"><div class="match-date">${formatDate(m.date)}</div><span class="match-divider">—</span></div>
+      <div class="match-right"><div class="match-player-name">Isira</div><div class="match-score-side">${m.scoreI}</div></div>
+      <div class="match-actions">
+        <button class="btn-match-action btn-edit-match" onclick="openEdit('nba','${m.id}')" title="Edit">✎</button>
+        <button class="btn-match-action btn-del-match" onclick="showDeleteConfirm('${m.id}')" title="Delete">🗑</button>
+      </div>
+      <div class="delete-confirm" id="dc-${m.id}">
+        <span class="delete-confirm-msg">Delete this match?</span>
+        <div class="delete-confirm-actions">
+          <button class="btn-confirm-cancel" onclick="hideDeleteConfirm('${m.id}')">Cancel</button>
+          <button class="btn-confirm-delete" onclick="confirmDelete('nba','${m.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard(){
+  const map={};
+  state.fifa.forEach(m=>{
+    (m.scorers||[]).forEach(s=>{
+      const name=s.name?.trim();if(!name)return;
+      if(!map[name]) map[name]={name,goals:0,assists:0,manager:s.manager};
+      map[name].goals+=+s.goals||0; map[name].assists+=+s.assists||0;
+    });
+  });
+  const list=Object.values(map);
+  document.getElementById('lbGoals').innerHTML   = lbRows([...list].sort((a,b)=>b.goals-a.goals).filter(p=>p.goals>0),'goals');
+  document.getElementById('lbAssists').innerHTML = lbRows([...list].sort((a,b)=>b.assists-a.assists).filter(p=>p.assists>0),'assists');
+}
+function lbRows(players,stat){
+  if(!players.length) return '<div class="lb-empty">No '+stat+' logged yet.</div>';
+  const medals=['🥇','🥈','🥉'];
+  return players.map((p,i)=>{
+    const rank=i<3?medals[i]:i+1;
+    const sub=stat==='goals'&&p.assists>0?p.assists+' ast':stat==='assists'&&p.goals>0?p.goals+' gls':'';
+    const badge=p.manager==='A'?'<span class="mgr-badge a">Aadhil</span>':'<span class="mgr-badge i">Isira</span>';
+    return `<div class="lb-row">
+      <div class="lb-rank">${rank}</div>
+      <div><div class="lb-player-name">${p.name}${badge}</div>${sub?`<div class="lb-player-meta">${sub}</div>`:''}</div>
+      <div class="lb-val">${p[stat]}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── AUTOCOMPLETE ────────────────────────────────────────────────────────
+function buildKnownNames(){
+  const set=new Set();
+  state.fifa.forEach(m=>(m.scorers||[]).forEach(s=>{if(s.name?.trim())set.add(s.name.trim());}));
+  knownNames=[...set].sort();
+}
+
+function attachAc(input, listId){
+  const list=document.getElementById(listId);
+  let activeIdx=-1;
+
+  input.addEventListener('input',()=>{
+    const q=input.value.trim().toLowerCase();
+    if(!q){list.classList.remove('show');return;}
+    const matches=knownNames.filter(n=>n.toLowerCase().includes(q)&&n.toLowerCase()!==q);
+    if(!matches.length){list.classList.remove('show');return;}
+    activeIdx=-1;
+    list.innerHTML=matches.slice(0,6).map((n,i)=>`<div class="ac-item" data-idx="${i}" onmousedown="pickAc(event,'${listId}','${n.replace(/'/g,"\\'")}',this)">${n}</div>`).join('');
+    list.classList.add('show');
+  });
+
+  input.addEventListener('keydown',e=>{
+    const items=list.querySelectorAll('.ac-item');
+    if(e.key==='ArrowDown'){e.preventDefault();activeIdx=Math.min(activeIdx+1,items.length-1);items.forEach((el,i)=>el.classList.toggle('active',i===activeIdx));}
+    else if(e.key==='ArrowUp'){e.preventDefault();activeIdx=Math.max(activeIdx-1,0);items.forEach((el,i)=>el.classList.toggle('active',i===activeIdx));}
+    else if(e.key==='Enter'&&activeIdx>=0){e.preventDefault();input.value=items[activeIdx].textContent;list.classList.remove('show');activeIdx=-1;}
+    else if(e.key==='Escape'){list.classList.remove('show');activeIdx=-1;}
+  });
+
+  input.addEventListener('blur',()=>setTimeout(()=>list.classList.remove('show'),150));
+}
+
+function pickAc(e,listId,name,el){
+  e.preventDefault();
+  const wrap=document.getElementById(listId).closest('.ac-wrap');
+  const inp=wrap.querySelector('input[type="text"]');
+  if(inp) inp.value=name;
+  document.getElementById(listId).classList.remove('show');
+}
+
+// ── FAB ─────────────────────────────────────────────────────────────────
+function fabClick(){ openModal(currentGame); }
+function updateFab(){
+  const fab=document.getElementById('fab');
+  fab.className='fab '+(currentGame==='fifa'?'fifa-active':'nba-active');
+}
+
+// ── GAME SWITCH ─────────────────────────────────────────────────────────
+function switchGame(game){
+  currentGame=game;
+  document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.game-section').forEach(s=>s.classList.remove('active'));
+  document.querySelector('.game-tab.'+game).classList.add('active');
+  document.getElementById('section-'+game).classList.add('active');
+  updateFab();
+}
+
+// ── LB TABS ─────────────────────────────────────────────────────────────
+function switchLbTab(tab){
+  document.getElementById('lbTabGoals').classList.toggle('active',tab==='goals');
+  document.getElementById('lbTabAssists').classList.toggle('active',tab==='assists');
+  document.getElementById('lbGoals').style.display   = tab==='goals'?'':'none';
+  document.getElementById('lbAssists').style.display = tab==='assists'?'':'none';
+}
+
+// ── HISTORY TOGGLE ───────────────────────────────────────────────────────
+function toggleHistory(game){
+  document.getElementById(game+'HistoryToggle').classList.toggle('open');
+  document.getElementById(game+'History').classList.toggle('open');
+}
+
+// ── MODALS ───────────────────────────────────────────────────────────────
+function openModal(game){
+  editingGame=null; editingId=null;
+  if(game==='fifa'){
+    document.getElementById('fifaModalTitle').textContent='⚽ Log FIFA Match';
+    document.getElementById('fifaSaveBtn').className='btn-save fifa';
+    document.getElementById('fifaSaveBtn').textContent='Save Match';
+    document.getElementById('fifaScorerList').innerHTML='';
+    document.getElementById('validationMsg').className='validation-msg';
+    scorerManagers={}; scorerCounter=0;
+    document.getElementById('fifaScoreA').value=0;
+    document.getElementById('fifaScoreI').value=0;
+    setDate('fifaDate');
+    addScorerRow();
+  } else {
+    document.getElementById('nbaModalTitle').textContent='🏀 Log 2K Match';
+    document.getElementById('nbaSaveBtn').className='btn-save nba';
+    document.getElementById('nbaSaveBtn').textContent='Save Match';
+    document.getElementById('nbaScoreA').value=0;
+    document.getElementById('nbaScoreI').value=0;
+    setDate('nbaDate');
+  }
+  document.getElementById(game+'Modal').classList.add('open');
+}
+
+function openEdit(game,id){
+  const match=state[game].find(m=>m.id===id);
+  if(!match) return;
+  editingGame=game; editingId=id;
+  if(game==='fifa'){
+    document.getElementById('fifaModalTitle').textContent='✎ Edit FIFA Match';
+    document.getElementById('fifaSaveBtn').className='btn-save edit';
+    document.getElementById('fifaSaveBtn').textContent='Update Match';
+    document.getElementById('fifaDate').value=match.date;
+    document.getElementById('fifaScoreA').value=match.scoreA;
+    document.getElementById('fifaScoreI').value=match.scoreI;
+    document.getElementById('fifaScorerList').innerHTML='';
+    document.getElementById('validationMsg').className='validation-msg';
+    scorerManagers={}; scorerCounter=0;
+    (match.scorers||[]).forEach(s=>{
+      const rowId=scorerCounter++;
+      scorerManagers[rowId]=s.manager||'A';
+      document.getElementById('fifaScorerList').insertAdjacentHTML('beforeend',buildScorerRowHtml(rowId,s.name,s.goals,s.assists,s.manager));
+    });
+    if(!match.scorers||!match.scorers.length) addScorerRow();
+  } else {
+    document.getElementById('nbaModalTitle').textContent='✎ Edit 2K Match';
+    document.getElementById('nbaSaveBtn').className='btn-save edit';
+    document.getElementById('nbaSaveBtn').textContent='Update Match';
+    document.getElementById('nbaDate').value=match.date;
+    document.getElementById('nbaScoreA').value=match.scoreA;
+    document.getElementById('nbaScoreI').value=match.scoreI;
+  }
+  document.getElementById(game+'Modal').classList.add('open');
+}
+
+function closeModal(game){
+  document.getElementById(game+'Modal').classList.remove('open');
+  editingGame=null; editingId=null;
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+
+// ── SCORER ROWS ──────────────────────────────────────────────────────────
+function buildScorerRowHtml(id,name='',goals=0,assists=0,manager='A'){
+  const aClass=manager==='A'?'manager-btn active-a':'manager-btn';
+  const iClass=manager==='I'?'manager-btn active-i':'manager-btn';
+  const acListId=`ac-${id}`;
+  return `<div class="scorer-item" id="scorer-${id}">
+    <div class="ac-wrap" style="position:relative">
+      <input type="text" placeholder="Player name" id="sName-${id}" value="${name}" style="font-size:14px;padding:10px 10px" autocomplete="off">
+      <div class="ac-list" id="${acListId}"></div>
+    </div>
+    <input type="number" min="0" max="20" value="${goals}" id="sGoals-${id}" oninput="clearValidation()">
+    <input type="number" min="0" max="20" value="${assists}" id="sAssists-${id}">
+    <button class="btn-remove" onclick="removeScorerRow(${id})">×</button>
+  </div>
+  <div class="scorer-manager-row" id="scorerMgr-${id}">
+    <button class="${aClass}" id="mgrA-${id}" onclick="setManager(${id},'A')">Aadhil's Player</button>
+    <button class="${iClass}" id="mgrI-${id}" onclick="setManager(${id},'I')">Isira's Player</button>
+  </div>`;
+}
+
+function addScorerRow(){
+  const id=scorerCounter++;
+  scorerManagers[id]='A';
+  document.getElementById('fifaScorerList').insertAdjacentHTML('beforeend',buildScorerRowHtml(id));
+  // Attach smart autocomplete to the new input
+  const input=document.getElementById('sName-'+id);
+  attachAc(input,'ac-'+id);
+}
+
+function removeScorerRow(id){
+  document.getElementById('scorer-'+id)?.remove();
+  document.getElementById('scorerMgr-'+id)?.remove();
+  delete scorerManagers[id];
+}
+
+function setManager(id,who){
+  scorerManagers[id]=who;
+  document.getElementById('mgrA-'+id).className='manager-btn'+(who==='A'?' active-a':'');
+  document.getElementById('mgrI-'+id).className='manager-btn'+(who==='I'?' active-i':'');
+}
+
+// Reattach autocomplete when editing existing matches
+function reattachAllAc(){
+  document.querySelectorAll('#fifaScorerList .scorer-item').forEach(item=>{
+    const id=item.id.replace('scorer-','');
+    const input=document.getElementById('sName-'+id);
+    if(input) attachAc(input,'ac-'+id);
+  });
+}
+
+// ── SCORE CHANGE HINT ────────────────────────────────────────────────────
+function onScoreChange(){ clearValidation(); }
+function clearValidation(){
+  const msg=document.getElementById('validationMsg');
+  if(msg) msg.className='validation-msg';
+}
+
+// ── GOAL VALIDATION ──────────────────────────────────────────────────────
+function validateGoals(scoreA,scoreI,scorers){
+  // Tally goals per manager
+  const totA=scorers.filter(s=>s.manager==='A').reduce((s,x)=>s+(+x.goals||0),0);
+  const totI=scorers.filter(s=>s.manager==='I').reduce((s,x)=>s+(+x.goals||0),0);
+
+  // If either player scored > 0, scorers must account for all goals
+  if(scoreA>0 && totA!==scoreA){
+    return `Goal mismatch: Aadhil has ${scoreA} goal${scoreA!==1?'s':''}, but player entries total ${totA}.`;
+  }
+  if(scoreI>0 && totI!==scoreI){
+    return `Goal mismatch: Isira has ${scoreI} goal${scoreI!==1?'s':''}, but player entries total ${totI}.`;
+  }
+  // If both scored 0, scorers should have 0 goals (no requirement to enter scorers)
+  return null;
+}
+
+function showValidationError(msg){
+  const el=document.getElementById('validationMsg');
+  el.textContent=msg;
+  el.className='validation-msg show';
+}
+
+// ── SAVE / UPDATE ────────────────────────────────────────────────────────
+function saveMatch(game){
+  if(game==='fifa'){
+    const scoreA=+document.getElementById('fifaScoreA').value;
+    const scoreI=+document.getElementById('fifaScoreI').value;
+    const date  = document.getElementById('fifaDate').value;
+    if(!date){showToast('Please pick a date');return;}
+
+    const scorers=[];
+    document.querySelectorAll('#fifaScorerList .scorer-item').forEach(item=>{
+      const id=item.id.replace('scorer-','');
+      const name=document.getElementById('sName-'+id)?.value.trim();
+      const goals=+document.getElementById('sGoals-'+id)?.value||0;
+      const assists=+document.getElementById('sAssists-'+id)?.value||0;
+      const manager=scorerManagers[id]||'A';
+      if(name) scorers.push({name,goals,assists,manager});
+    });
+
+    // Only validate if any scorers were entered OR any goals scored
+    if(scoreA>0||scoreI>0){
+      const err=validateGoals(scoreA,scoreI,scorers);
+      if(err){showValidationError(err);return;}
+    }
+
+    if(editingId){
+      const idx=state.fifa.findIndex(m=>m.id===editingId);
+      if(idx>-1) state.fifa[idx]={...state.fifa[idx],date,scoreA,scoreI,scorers};
+    } else {
+      state.fifa.push({id:uid(),date,scoreA,scoreI,scorers});
+    }
+  } else {
+    const scoreA=+document.getElementById('nbaScoreA').value;
+    const scoreI=+document.getElementById('nbaScoreI').value;
+    const date  = document.getElementById('nbaDate').value;
+    if(!date){showToast('Please pick a date');return;}
+    if(editingId){
+      const idx=state.nba.findIndex(m=>m.id===editingId);
+      if(idx>-1) state.nba[idx]={...state.nba[idx],date,scoreA,scoreI};
+    } else {
+      state.nba.push({id:uid(),date,scoreA,scoreI});
+    }
+  }
+
+  closeModal(game);
+  saveData();
+
+  if(!editingId){
+    const tog=document.getElementById(game+'HistoryToggle');
+    const lst=document.getElementById(game+'History');
+    if(!tog.classList.contains('open')){tog.classList.add('open');lst.classList.add('open');}
+  }
+}
+
+// ── DELETE ───────────────────────────────────────────────────────────────
+function showDeleteConfirm(id){ document.getElementById('dc-'+id)?.classList.add('show'); }
+function hideDeleteConfirm(id){ document.getElementById('dc-'+id)?.classList.remove('show'); }
+function confirmDelete(game,id){
+  state[game]=state[game].filter(m=>m.id!==id);
+  saveData();
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────
+function showToast(msg,isError=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(isError?' error':'')+' show';
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
