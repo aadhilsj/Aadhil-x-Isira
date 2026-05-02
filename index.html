@@ -688,17 +688,24 @@ function withTimeout(ms) {
   return { controller, timer };
 }
 
+function dateToMillis(dateString) {
+  if (!dateString) return 0;
+  const parsed = new Date(`${dateString}T12:00:00`).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function normalizeMatch(match, game) {
   if (!match || typeof match !== 'object') return null;
   const id = String(match.id || uid());
-  const createdAt = Number(match.ts || match.createdAt || match.updatedAt || Date.now());
-  const updatedAt = Number(match.updatedAt || createdAt);
+  const fallbackTime = dateToMillis(match.date);
+  const createdAt = Number(match.ts || match.createdAt || fallbackTime || 0);
+  const updatedAt = Number(match.updatedAt || createdAt || fallbackTime || 0);
   const normalized = {
     id,
     date: match.date || today(),
     scoreA: Number(match.scoreA || 0),
     scoreI: Number(match.scoreI || 0),
-    ts: createdAt,
+    ts: createdAt || fallbackTime || 0,
     updatedAt
   };
   if (game === 'fifa') {
@@ -752,10 +759,10 @@ function normalizeState(raw) {
 
 function sortMatches(matches) {
   return [...matches].sort((a, b) => {
-    if (a.ts && b.ts) return b.ts - a.ts;
-    if (a.ts) return -1;
-    if (b.ts) return 1;
-    return new Date(b.date) - new Date(a.date);
+    const timeA = Number(a.ts || dateToMillis(a.date) || 0);
+    const timeB = Number(b.ts || dateToMillis(b.date) || 0);
+    if (timeA !== timeB) return timeB - timeA;
+    return String(b.id || '').localeCompare(String(a.id || ''));
   });
 }
 
