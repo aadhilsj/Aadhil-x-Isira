@@ -616,8 +616,12 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
 const JSONBIN_BIN_ID  = '69da5708aaba882197e9ff52';
 const JSONBIN_API_KEY = '$2a$10$Megw7YnRy64t5JAWpc8zpOnaut6f9LU2aMyT8vbEuAD7NYkRlbnzi';
 const JSONBIN_URL     = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
-const LOCAL_CACHE_KEY = 'rivalry-tracker-cache-v3';
-const LOCAL_DIRTY_KEY = 'rivalry-tracker-dirty-v3';
+const LOCAL_CACHE_KEY = 'rivalry-tracker-cache-v4';
+const LOCAL_DIRTY_KEY = 'rivalry-tracker-dirty-v4';
+const LEGACY_CACHE_KEYS = [
+  'rivalry-tracker-cache-v3',
+  'rivalry-tracker-dirty-v3'
+];
 const FETCH_TIMEOUT_MS = 12000;
 const SAVE_TIMEOUT_MS = 30000;
 
@@ -639,6 +643,7 @@ let statusToastAt  = 0;
 // ── BOOT ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   setDate('fifaDate'); setDate('nbaDate');
+  clearLegacyCacheKeys();
   const hasCache = hydrateFromLocalCache();
   loadData({ background: hasCache, silent: hasCache, useTimeout: hasCache });
   updateFab();
@@ -663,6 +668,9 @@ function today()  { return new Date().toISOString().split('T')[0]; }
 function setDate(id) { document.getElementById(id).value = today(); }
 function uid()    { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function deepClone(v) { return JSON.parse(JSON.stringify(v)); }
+function clearLegacyCacheKeys() {
+  LEGACY_CACHE_KEYS.forEach((key) => localStorage.removeItem(key));
+}
 function formatDate(d) {
   if (!d) return '';
   return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
