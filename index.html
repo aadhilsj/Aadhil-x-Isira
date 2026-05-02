@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aadhil vs Isira — Rivalry Tracker</title>
+<meta name="theme-color" content="#111214">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rivalry Tracker">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -58,6 +65,12 @@ header h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(38px,10vw,60
 .vs-dot { display: inline-block; color: var(--border); margin: 0 10px; font-size: 0.55em; vertical-align: middle; }
 .sync-bar { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); letter-spacing: 0.12em; position: relative; z-index: 1; }
 .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+.sync-bar[data-state="loading"] .sync-dot,
+.sync-bar[data-state="syncing"] .sync-dot { background: var(--gold); }
+.sync-bar[data-state="pending"] .sync-dot,
+.sync-bar[data-state="offline"] .sync-dot { background: #f97316; }
+.sync-bar[data-state="error"] .sync-dot { background: var(--accent-a); }
+.sync-bar[data-state="synced"] .sync-dot { background: #4ade80; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
 /* ── LAYOUT ── */
@@ -370,7 +383,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
 <header>
   <div class="header-label">The Flatmate Rivalry · Oslo</div>
   <h1><span class="name-a">Aadhil</span><span class="vs-dot">×</span><span class="name-i">Isira</span></h1>
-  <div class="sync-bar"><div class="sync-dot"></div><span id="syncLabel">LOADING</span></div>
+  <div class="sync-bar" id="syncBar" data-state="loading"><div class="sync-dot"></div><span id="syncLabel">LOADING</span></div>
 </header>
 
 <main>
@@ -603,9 +616,13 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
 const JSONBIN_BIN_ID  = '69da5708aaba882197e9ff52';
 const JSONBIN_API_KEY = '$2a$10$Megw7YnRy64t5JAWpc8zpOnaut6f9LU2aMyT8vbEuAD7NYkRlbnzi';
 const JSONBIN_URL     = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const LOCAL_CACHE_KEY = 'rivalry-tracker-cache-v3';
+const LOCAL_DIRTY_KEY = 'rivalry-tracker-dirty-v3';
+const FETCH_TIMEOUT_MS = 5000;
+const SAVE_TIMEOUT_MS = 8000;
 
 // ── STATE ───────────────────────────────────────────────────────────────
-let state = { fifa: [], nba: [] };
+let state = { fifa: [], nba: [], deleted: { fifa: {}, nba: {} } };
 let scorerCounter  = 0;
 let scorerManagers = {};
 let editingGame    = null;
@@ -613,17 +630,39 @@ let editingId      = null;
 let currentGame    = 'fifa';
 // All known player names for autocomplete
 let knownNames     = [];
+let hasHydrated    = false;
+let isDirty        = false;
+let syncPromise    = null;
+let syncQueued     = false;
+let statusToastAt  = 0;
 
 // ── BOOT ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   setDate('fifaDate'); setDate('nbaDate');
+  hydrateFromLocalCache();
   loadData();
   updateFab();
+  registerPwa();
+  window.addEventListener('online', () => {
+    setSyncLabel(isDirty ? 'SYNC PENDING' : 'BACK ONLINE', isDirty ? 'pending' : 'synced');
+    if (isDirty) queueSync({ silent: true });
+    else if (hasHydrated) loadData({ background: true, silent: true });
+  });
+  window.addEventListener('offline', () => {
+    setSyncLabel(isDirty ? 'OFFLINE · PENDING' : 'OFFLINE', 'offline');
+  });
+  window.addEventListener('visibilitychange', () => {
+    if (!document.hidden && (isDirty || navigator.onLine)) loadData({ background: true, silent: true });
+  });
+  window.addEventListener('pageshow', () => {
+    if (isDirty || navigator.onLine) loadData({ background: true, silent: true });
+  });
 });
 
 function today()  { return new Date().toISOString().split('T')[0]; }
 function setDate(id) { document.getElementById(id).value = today(); }
 function uid()    { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function deepClone(v) { return JSON.parse(JSON.stringify(v)); }
 function formatDate(d) {
   if (!d) return '';
   return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
@@ -643,33 +682,286 @@ function getResult(m) {
   if(sA>sI) return 'A'; if(sI>sA) return 'I'; return 'D';
 }
 
-// ── JSONBIN ─────────────────────────────────────────────────────────────
-async function loadData() {
-  setSyncLabel('LOADING…');
-  try {
-    const r = await fetch(JSONBIN_URL+'/latest', { headers:{'X-Access-Key':JSONBIN_API_KEY} });
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const d = await r.json();
-    if(d.record) state = { fifa: d.record.fifa||[], nba: d.record.nba||[] };
-    setSyncLabel('SYNCED');
-  } catch(e) { setSyncLabel('OFFLINE'); showToast('Could not load — running offline'); }
-  render();
+function withTimeout(ms) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return { controller, timer };
 }
-async function saveData() {
-  render();
-  setSyncLabel('SAVING…');
+
+function normalizeMatch(match, game) {
+  if (!match || typeof match !== 'object') return null;
+  const id = String(match.id || uid());
+  const createdAt = Number(match.ts || match.createdAt || match.updatedAt || Date.now());
+  const updatedAt = Number(match.updatedAt || createdAt);
+  const normalized = {
+    id,
+    date: match.date || today(),
+    scoreA: Number(match.scoreA || 0),
+    scoreI: Number(match.scoreI || 0),
+    ts: createdAt,
+    updatedAt
+  };
+  if (game === 'fifa') {
+    normalized.scorers = Array.isArray(match.scorers)
+      ? match.scorers
+          .map((s) => {
+            if (!s || typeof s !== 'object') return null;
+            const name = String(s.name || '').trim();
+            if (!name) return null;
+            return {
+              name,
+              goals: Number(s.goals || 0),
+              assists: Number(s.assists || 0),
+              manager: s.manager === 'I' ? 'I' : 'A'
+            };
+          })
+          .filter(Boolean)
+      : [];
+  }
+  return normalized;
+}
+
+function normalizeDeletedMap(value) {
+  const out = {};
+  if (Array.isArray(value)) {
+    value.forEach((row) => {
+      if (!row || !row.id) return;
+      out[String(row.id)] = Number(row.deletedAt || Date.now());
+    });
+    return out;
+  }
+  if (!value || typeof value !== 'object') return out;
+  Object.entries(value).forEach(([id, deletedAt]) => {
+    const ts = Number(deletedAt || 0);
+    if (id && ts > 0) out[String(id)] = ts;
+  });
+  return out;
+}
+
+function normalizeState(raw) {
+  const input = raw && typeof raw === 'object' ? raw : {};
+  return {
+    fifa: Array.isArray(input.fifa) ? input.fifa.map((m) => normalizeMatch(m, 'fifa')).filter(Boolean) : [],
+    nba: Array.isArray(input.nba) ? input.nba.map((m) => normalizeMatch(m, 'nba')).filter(Boolean) : [],
+    deleted: {
+      fifa: normalizeDeletedMap(input.deleted?.fifa),
+      nba: normalizeDeletedMap(input.deleted?.nba)
+    }
+  };
+}
+
+function sortMatches(matches) {
+  return [...matches].sort((a, b) => {
+    if (a.ts && b.ts) return b.ts - a.ts;
+    if (a.ts) return -1;
+    if (b.ts) return 1;
+    return new Date(b.date) - new Date(a.date);
+  });
+}
+
+function statesEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function mergeStates(localState, remoteState) {
+  const local = normalizeState(localState);
+  const remote = normalizeState(remoteState);
+  const merged = { fifa: [], nba: [], deleted: { fifa: {}, nba: {} } };
+
+  ['fifa', 'nba'].forEach((game) => {
+    const matchMap = new Map();
+    [...local[game], ...remote[game]].forEach((match) => {
+      const prev = matchMap.get(match.id);
+      if (!prev || Number(match.updatedAt || 0) > Number(prev.updatedAt || 0)) {
+        matchMap.set(match.id, match);
+      }
+    });
+
+    const deletedIds = new Set([
+      ...Object.keys(local.deleted[game] || {}),
+      ...Object.keys(remote.deleted[game] || {})
+    ]);
+
+    deletedIds.forEach((id) => {
+      const deletedAt = Math.max(
+        Number(local.deleted[game]?.[id] || 0),
+        Number(remote.deleted[game]?.[id] || 0)
+      );
+      const match = matchMap.get(id);
+      const updatedAt = Number(match?.updatedAt || 0);
+      if (deletedAt > updatedAt) {
+        merged.deleted[game][id] = deletedAt;
+        matchMap.delete(id);
+      }
+    });
+
+    merged[game] = sortMatches([...matchMap.values()]);
+  });
+
+  return merged;
+}
+
+function persistLocalState() {
+  localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
+  localStorage.setItem(LOCAL_DIRTY_KEY, isDirty ? '1' : '0');
+}
+
+function markDirty(nextDirty) {
+  isDirty = !!nextDirty;
+  localStorage.setItem(LOCAL_DIRTY_KEY, isDirty ? '1' : '0');
+}
+
+function hydrateFromLocalCache() {
+  try {
+    const cached = localStorage.getItem(LOCAL_CACHE_KEY);
+    if (!cached) return;
+    state = normalizeState(JSON.parse(cached));
+    isDirty = localStorage.getItem(LOCAL_DIRTY_KEY) === '1';
+    hasHydrated = true;
+    render();
+    setSyncLabel(isDirty ? 'LOCAL CACHE · PENDING' : 'LOCAL CACHE', isDirty ? 'pending' : 'synced');
+  } catch (error) {
+    console.warn('Failed to hydrate cache', error);
+  }
+}
+
+// ── JSONBIN ─────────────────────────────────────────────────────────────
+async function fetchRemoteState(timeoutMs = FETCH_TIMEOUT_MS) {
+  const { controller, timer } = withTimeout(timeoutMs);
+  try {
+    const r = await fetch(JSONBIN_URL + '/latest', {
+      headers: { 'X-Access-Key': JSONBIN_API_KEY },
+      signal: controller.signal,
+      cache: 'no-store'
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    return normalizeState(d.record || {});
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function pushRemoteState(nextState, timeoutMs = SAVE_TIMEOUT_MS) {
+  const payload = normalizeState(nextState);
+  const { controller, timer } = withTimeout(timeoutMs);
   try {
     const r = await fetch(JSONBIN_URL, {
-      method:'PUT',
-      headers:{'Content-Type':'application/json','X-Access-Key':JSONBIN_API_KEY},
-      body: JSON.stringify(state)
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Key': JSONBIN_API_KEY
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    setSyncLabel('SYNCED');
-    showToast(editingId ? 'Match updated ✓' : 'Match saved ✓');
-  } catch(e) { setSyncLabel('ERROR'); showToast('Sync failed — check connection'); }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return payload;
+  } finally {
+    clearTimeout(timer);
+  }
 }
-function setSyncLabel(t) { document.getElementById('syncLabel').textContent = t; }
+
+async function loadData(options = {}) {
+  const { background = false, silent = false } = options;
+  if (!background || !hasHydrated) setSyncLabel('LOADING…', 'loading');
+  try {
+    const remoteState = await fetchRemoteState();
+    const mergedState = mergeStates(state, remoteState);
+    const changed = !statesEqual(state, mergedState);
+    state = mergedState;
+    hasHydrated = true;
+    render();
+    persistLocalState();
+    if (isDirty) {
+      setSyncLabel('SYNC PENDING', 'pending');
+      await queueSync({ silent });
+      return;
+    }
+    setSyncLabel('SYNCED', 'synced');
+    if (changed && !silent) maybeToast('Synced latest matches');
+  } catch (error) {
+    console.warn('Load failed', error);
+    setSyncLabel(isDirty ? 'OFFLINE · PENDING' : 'OFFLINE', isDirty ? 'pending' : 'offline');
+    if (!silent && !hasHydrated) showToast('Could not load remote data. Using local cache.', true);
+  }
+}
+
+function queueSync(options = {}) {
+  if (syncPromise) {
+    syncQueued = true;
+    setSyncLabel('SYNC QUEUED', 'pending');
+    return syncPromise;
+  }
+  syncPromise = performSync(options).finally(() => {
+    syncPromise = null;
+    if (syncQueued) {
+      syncQueued = false;
+      queueSync({ silent: true });
+    }
+  });
+  return syncPromise;
+}
+
+async function performSync(options = {}) {
+  const { silent = false } = options;
+  if (!navigator.onLine) {
+    setSyncLabel('OFFLINE · PENDING', 'pending');
+    return;
+  }
+  render();
+  persistLocalState();
+  setSyncLabel('SYNCING…', 'syncing');
+  try {
+    const remoteState = await fetchRemoteState();
+    const mergedState = mergeStates(state, remoteState);
+    await pushRemoteState(mergedState);
+    const remoteAfterSave = await fetchRemoteState();
+    const verifiedState = mergeStates(mergedState, remoteAfterSave);
+    if (!statesEqual(remoteAfterSave, verifiedState)) {
+      await pushRemoteState(verifiedState);
+    }
+    state = verifiedState;
+    hasHydrated = true;
+    markDirty(false);
+    persistLocalState();
+    render();
+    setSyncLabel('SYNCED', 'synced');
+    if (!silent) showToast('Saved and synced ✓');
+  } catch (error) {
+    console.warn('Sync failed', error);
+    markDirty(true);
+    persistLocalState();
+    setSyncLabel('SYNC PENDING', 'pending');
+    if (!silent) showToast('Saved locally. Will retry sync.', true);
+  }
+}
+
+function saveData(options = {}) {
+  markDirty(true);
+  persistLocalState();
+  return queueSync(options);
+}
+
+function setSyncLabel(text, stateName = 'synced') {
+  document.getElementById('syncLabel').textContent = text;
+  document.getElementById('syncBar').dataset.state = stateName;
+}
+
+function maybeToast(msg) {
+  const now = Date.now();
+  if (now - statusToastAt < 4000) return;
+  statusToastAt = now;
+  showToast(msg);
+}
+
+function registerPwa() {
+  if (!('serviceWorker' in navigator)) return;
+  if (!/^https?:$/.test(location.protocol)) return;
+  navigator.serviceWorker.register('./sw.js').catch((error) => {
+    console.warn('Service worker registration failed', error);
+  });
+}
 
 // ── RENDER ──────────────────────────────────────────────────────────────
 function render() {
@@ -736,7 +1028,7 @@ function renderOverall() {
 }
 
 function computeStreak(matches){
-  const s=[...matches].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const s=sortMatches(matches);
   let who=null,count=0;
   for(const m of s){
     const r=getResult(m);
@@ -747,7 +1039,7 @@ function computeStreak(matches){
 }
 
 function computeForm(matches,n=5){
-  return [...matches].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,n).map(m=>{
+  return sortMatches(matches).slice(0,n).map(m=>{
     const r=getResult(m);
     if(r==='A') return '<span style="color:var(--accent-a);font-weight:700">W</span>';
     if(r==='I') return '<span style="color:var(--accent-i);font-weight:700">L</span>';
@@ -1152,6 +1444,7 @@ function openEdit(game,id){
       scorerManagers[rowId]=s.manager||'A';
       document.getElementById('fifaScorerList').insertAdjacentHTML('beforeend',buildScorerRowHtml(rowId,s.name,s.goals,s.assists,s.manager));
     });
+    reattachAllAc();
     if(!match.scorers||!match.scorers.length) addScorerRow();
   } else {
     document.getElementById('nbaModalTitle').textContent='✎ Edit 2K Match';
@@ -1223,6 +1516,23 @@ function reattachAllAc(){
   });
 }
 
+function upsertMatch(game, match) {
+  const normalized = normalizeMatch(match, game);
+  const idx = state[game].findIndex((item) => item.id === normalized.id);
+  if (idx > -1) state[game][idx] = normalized;
+  else state[game].push(normalized);
+  if (!state.deleted) state.deleted = { fifa: {}, nba: {} };
+  if (!state.deleted[game]) state.deleted[game] = {};
+  delete state.deleted[game][normalized.id];
+}
+
+function markMatchDeleted(game, id) {
+  if (!state.deleted) state.deleted = { fifa: {}, nba: {} };
+  if (!state.deleted[game]) state.deleted[game] = {};
+  state[game] = state[game].filter((m) => m.id !== id);
+  state.deleted[game][id] = Date.now();
+}
+
 // ── SCORE CHANGE HINT ────────────────────────────────────────────────────
 function onScoreChange(){ clearValidation(); }
 function clearValidation(){
@@ -1255,6 +1565,8 @@ function showValidationError(msg){
 
 // ── SAVE / UPDATE ────────────────────────────────────────────────────────
 function saveMatch(game){
+  const now = Date.now();
+  const wasEditing = !!editingId;
   if(game==='fifa'){
     const scoreA=+document.getElementById('fifaScoreA').value;
     const scoreI=+document.getElementById('fifaScoreI').value;
@@ -1279,9 +1591,11 @@ function saveMatch(game){
 
     if(editingId){
       const idx=state.fifa.findIndex(m=>m.id===editingId);
-      if(idx>-1) state.fifa[idx]={...state.fifa[idx],date,scoreA,scoreI,scorers};
+      if(idx>-1) {
+        upsertMatch('fifa', {...state.fifa[idx], date, scoreA, scoreI, scorers, updatedAt: now });
+      }
     } else {
-      state.fifa.push({id:uid(),date,scoreA,scoreI,scorers,ts:Date.now()});
+      upsertMatch('fifa', { id: uid(), date, scoreA, scoreI, scorers, ts: now, updatedAt: now });
     }
   } else {
     const scoreA=+document.getElementById('nbaScoreA').value;
@@ -1290,16 +1604,20 @@ function saveMatch(game){
     if(!date){showToast('Please pick a date');return;}
     if(editingId){
       const idx=state.nba.findIndex(m=>m.id===editingId);
-      if(idx>-1) state.nba[idx]={...state.nba[idx],date,scoreA,scoreI};
+      if(idx>-1) {
+        upsertMatch('nba', { ...state.nba[idx], date, scoreA, scoreI, updatedAt: now });
+      }
     } else {
-      state.nba.push({id:uid(),date,scoreA,scoreI,ts:Date.now()});
+      upsertMatch('nba', { id: uid(), date, scoreA, scoreI, ts: now, updatedAt: now });
     }
   }
 
+  render();
+  persistLocalState();
   closeModal(game);
-  saveData();
+  saveData({ silent: false });
 
-  if(!editingId){
+  if(!wasEditing){
     const tog=document.getElementById(game+'HistoryToggle');
     const lst=document.getElementById(game+'History');
     if(!tog.classList.contains('open')){tog.classList.add('open');lst.classList.add('open');}
@@ -1310,8 +1628,10 @@ function saveMatch(game){
 function showDeleteConfirm(id){ document.getElementById('dc-'+id)?.classList.add('show'); }
 function hideDeleteConfirm(id){ document.getElementById('dc-'+id)?.classList.remove('show'); }
 function confirmDelete(game,id){
-  state[game]=state[game].filter(m=>m.id!==id);
-  saveData();
+  markMatchDeleted(game,id);
+  render();
+  persistLocalState();
+  saveData({ silent: false });
 }
 
 // ── TOAST ────────────────────────────────────────────────────────────────
