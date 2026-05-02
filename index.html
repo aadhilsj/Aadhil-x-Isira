@@ -767,8 +767,11 @@ function normalizeState(raw) {
 
 function sortMatches(matches) {
   return [...matches].sort((a, b) => {
-    const timeA = Number(a.ts || dateToMillis(a.date) || 0);
-    const timeB = Number(b.ts || dateToMillis(b.date) || 0);
+    const dateA = Number(dateToMillis(a.date) || 0);
+    const dateB = Number(dateToMillis(b.date) || 0);
+    if (dateA !== dateB) return dateB - dateA;
+    const timeA = Number(a.ts || a.updatedAt || dateA || 0);
+    const timeB = Number(b.ts || b.updatedAt || dateB || 0);
     if (timeA !== timeB) return timeB - timeA;
     return String(b.id || '').localeCompare(String(a.id || ''));
   });
@@ -1022,15 +1025,10 @@ function renderOverall() {
   document.getElementById('mStreakLabel').textContent = 'Current Streak';
 
   // Last game — ts desc if available, else date desc then insertion order tiebreak
-  const tagged = [
+  const tagged = sortMatches([
     ...state.fifa.map((m,i)=>({...m,_game:'fifa',_idx:i})),
     ...state.nba.map((m,i)=>({...m,_game:'nba',_idx:i}))
-  ].sort((a,b)=>{
-    if(a.ts && b.ts) return b.ts - a.ts;
-    if(a.ts) return -1; if(b.ts) return 1;
-    const dd=new Date(b.date)-new Date(a.date);
-    return dd!==0 ? dd : b._idx-a._idx;
-  });
+  ]);
   const lastEl=document.getElementById('mLastScore'), metaEl=document.getElementById('mLastMeta');
   if(tagged.length){
     const m=tagged[0], r=getResult(m), icon=m._game==='fifa'?'⚽':'🏀';
@@ -1235,13 +1233,7 @@ function renderFifaHistory(){
     return;
   }
   // Sort: ts desc if available, else date desc then insertion order desc
-  const sorted=[...state.fifa].map((m,i)=>({...m,_idx:i}))
-    .sort((a,b)=>{
-      if(a.ts && b.ts) return b.ts - a.ts;
-      if(a.ts) return -1; if(b.ts) return 1;
-      const dd=new Date(b.date)-new Date(a.date);
-      return dd!==0?dd:b._idx-a._idx;
-    });
+  const sorted=sortMatches([...state.fifa].map((m,i)=>({...m,_idx:i})));
   el.innerHTML=sorted.map(m=>{
     const r=getResult(m),cls=r==='A'?'win-a':r==='I'?'win-i':'draw';
     const leftS=(m.scorers||[]).filter(s=>s.manager==='A'&&(+s.goals>0||+s.assists>0));
@@ -1286,13 +1278,7 @@ function renderNbaHistory(){
     el.innerHTML='<div class="empty-state"><div class="empty-icon">🏀</div><p>No 2K matches yet.<br>Log your first one!</p></div>';
     return;
   }
-  const sorted=[...state.nba].map((m,i)=>({...m,_idx:i}))
-    .sort((a,b)=>{
-      if(a.ts && b.ts) return b.ts - a.ts;
-      if(a.ts) return -1; if(b.ts) return 1;
-      const dd=new Date(b.date)-new Date(a.date);
-      return dd!==0?dd:b._idx-a._idx;
-    });
+  const sorted=sortMatches([...state.nba].map((m,i)=>({...m,_idx:i})));
   el.innerHTML=sorted.map(m=>{
     const r=getResult(m),cls=r==='A'?'win-a':r==='I'?'win-i':'draw';
     return `<div class="match-card ${cls}" id="mc-${m.id}">
