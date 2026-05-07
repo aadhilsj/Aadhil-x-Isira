@@ -624,6 +624,7 @@ const LEGACY_CACHE_KEYS = [
 ];
 const FETCH_TIMEOUT_MS = 12000;
 const SAVE_TIMEOUT_MS = 30000;
+const RETRY_SYNC_INTERVAL_MS = 15000;
 
 // ── STATE ───────────────────────────────────────────────────────────────
 let state = { fifa: [], nba: [], deleted: { fifa: {}, nba: {} } };
@@ -639,6 +640,7 @@ let isDirty        = false;
 let syncPromise    = null;
 let syncQueued     = false;
 let statusToastAt  = 0;
+let retryTimer     = null;
 
 // ── BOOT ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -648,6 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadData({ background: hasCache, silent: hasCache, useTimeout: hasCache });
   updateFab();
   registerPwa();
+  ensureRetryLoop();
   window.addEventListener('online', () => {
     setSyncLabel(isDirty ? 'SYNC PENDING' : 'BACK ONLINE', isDirty ? 'pending' : 'synced');
     if (isDirty) queueSync({ silent: true });
@@ -969,6 +972,14 @@ function maybeToast(msg) {
   if (now - statusToastAt < 4000) return;
   statusToastAt = now;
   showToast(msg);
+}
+
+function ensureRetryLoop() {
+  if (retryTimer) return;
+  retryTimer = window.setInterval(() => {
+    if (!isDirty || syncPromise || !navigator.onLine) return;
+    queueSync({ silent: true });
+  }, RETRY_SYNC_INTERVAL_MS);
 }
 
 function registerPwa() {
